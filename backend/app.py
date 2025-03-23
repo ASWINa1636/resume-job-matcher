@@ -102,39 +102,39 @@ def find_jobs_from_database(skills):
 
         # Convert extracted skills to lowercase for case-insensitive matching
         skills = [skill.lower().strip() for skill in skills]
-        print("\n✅ Extracted Skills (Cleaned):", skills)  # Debugging skills list
+        print("\nExtracted Skills (Cleaned):", skills)  # Debugging skills list
 
         matched_jobs = []
         for job in jobs:
             try:
-                # ✅ Properly parse JSON skill list
+                #  Properly parse JSON skill list
                 job_skills = json.loads(job[5])  # Convert string to list
                 job_skills = [skill.lower().strip() for skill in job_skills]  # Normalize
             except json.JSONDecodeError:
-                print(f"⚠️ Warning: Job skills format issue for job ID {job[0]}")
+                print(f"Warning: Job skills format issue for job ID {job[0]}")
                 continue  # Skip this job if parsing fails
 
-            print(f"\n🔍 Checking Job: {job[1]}")
+            print(f"\n Checking Job: {job[1]}")
             print(f" - Job Skills (DB): {job_skills}")
             print(f" - Candidate Skills: {skills}")
 
-            # ✅ Check if at least one skill matches
+            # Check if at least one skill matches
             if any(skill in job_skills for skill in skills):
-                print("✅ Match Found!")
+                print(" Match Found!")
                 matched_jobs.append({
                     "id": job[0],
                     "title": job[1],
                     "company": job[2],
                     "location": job[3],
                     "description": job[4],
-                    "required_skills": job_skills,  # ✅ Show as a proper list
+                    "required_skills": job_skills,  #  Show as a proper list
                     "salary": job[6],
                     "date_posted": job[7]
                 })
             else:
-                print("❌ No Match - Check Formatting in DB")
+                print(" No Match - Check Formatting in DB")
 
-        print("\n📌 Final Matched Jobs:", matched_jobs)  # Debugging output
+        print("\n Final Matched Jobs:", matched_jobs)  # Debugging output
         return matched_jobs
     
     except Exception as e:

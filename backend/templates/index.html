@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Viewers</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #d1fff4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+        .search-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 60%;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .custom-file-upload {
+            background: #00a8a8;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .results-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            text-align: left;
+        }
+        .placeholder {
+            color: #666;
+        }
+    </style>
+    <script>
+        function searchJobs() {
+            const skills = document.getElementById("skills-input").value.trim();
+            if (!skills) return;
+
+            // Change the heading
+            document.getElementById("results-heading").innerText = "Based on your search:";
+
+            fetch(`/search?skills=${encodeURIComponent(skills)}`)
+                .then(response => response.json())
+                .then(data => displayResults(data.job_recommendations))
+                .catch(error => console.error("Error fetching jobs:", error));
+        }
+
+        function uploadResume() {
+            const fileInput = document.getElementById("file-upload");
+            if (!fileInput.files.length) return;
+            
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            // Change the heading
+            document.getElementById("results-heading").innerText = "Based on your resume:";
+
+            fetch("/upload", { method: "POST", body: formData })
+                .then(response => response.json())
+                .then(data => displayResults(data.job_recommendations))
+                .catch(error => console.error("Error uploading file:", error));
+        }
+
+        function displayResults(jobs) {
+            const resultsContainer = document.querySelector(".results-container");
+            resultsContainer.innerHTML = "";
+
+            if (jobs.length === 0) {
+                resultsContainer.innerHTML = "<p class='placeholder'>No matching jobs found.</p>";
+                return;
+            }
+
+            jobs.forEach(job => {
+                const jobElement = document.createElement("div");
+                jobElement.innerHTML = `
+                    <h3>${job.title} at ${job.company}</h3>
+                    <p><strong>Location:</strong> ${job.location}</p>
+                    <p><strong>Description:</strong> ${job.description}</p>
+                    <p><strong>Required Skills:</strong> ${job.required_skills.join(", ")}</p>
+                    <p><strong>Salary:</strong> ${job.salary}</p>
+                    <p><strong>Date Posted:</strong> ${job.date_posted}</p>
+                    <hr>
+                `;
+                resultsContainer.appendChild(jobElement);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to <strong>JOB VIEWERS</strong></h1>
+        
+        <div class="search-section">
+            <input id="skills-input" type="text" placeholder="Search jobs by skills">
+            <label for="file-upload" class="custom-file-upload">Upload Resume</label>
+            <input id="file-upload" type="file" hidden onchange="uploadResume()">
+            <button class="search-btn" onclick="searchJobs()">Search</button>
+        </div>
+        
+        <h2 id="results-heading">Based on your resume:</h2>
+        <div class="results-container">
+            <p class="placeholder">Results will be displayed here...</p>
+        </div>
+    </div>
+</body>
+</html>
